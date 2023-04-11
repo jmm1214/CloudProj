@@ -19,17 +19,26 @@
         font-family: Arial, Helvetica, sans-serif;
         font-size: 20px;
         margin-left: 20px;
+        width: 100px;
         }
+     #output {
+        font-size: 30px;
+     }
+    
     </style>
     <script>
+        
+        // create an empty array to store the results
+        var resultsArray = [];
+
         // define the callAPI function that takes a first name and last name as parameters
-        var callAPI = (firstName,lastName)=>{
+        var callAPI = (Name, PPG, APG, RPG) => {
             // instantiate a headers object
             var myHeaders = new Headers();
             // add content type header to object
             myHeaders.append("Content-Type", "application/json");
             // using built in JSON utility package turn object to string and store in a variable
-            var raw = JSON.stringify({"firstName":firstName,"lastName":lastName});
+            var raw = JSON.stringify({"Name":Name,"PPG":PPG, "APG":APG, "RPG":RPG});
             // create a JSON object with parameters for API call and store in a variable
             var requestOptions = {
                 method: 'POST',
@@ -44,27 +53,52 @@
                 // get reference to the div element in the HTML body
                 var outputDiv = document.getElementById("output");
                 // update the innerHTML of the div with the first name and last name parameters
-                outputDiv.innerHTML = "First Name: " + firstName + "<br>Last Name: " + lastName + "<br><br>API Response: " + JSON.parse(result).body;
+                var resultObj = {"Name": Name, "PPG": PPG,"APG":APG, "RPG":RPG, "response": JSON.parse(result).body};
+                resultsArray.push(resultObj);
+                var listHtml = "<ul>";
+                resultsArray.forEach(result => {
+                    listHtml += "<li>Name: " + result.Name + ", PPG: " + result.PPG + ", APG: " + result.APG + ", RPG: " + result.RPG + ", API Response: " + result.response + "</li>";
+                });
+                listHtml += "</ul>";
+                outputDiv.innerHTML = listHtml;
             })
             .catch(error => console.log('error', error));
-
-            
         }
 
         var clearOutput = () => {
             var outputDiv = document.getElementById("output");
             outputDiv.innerHTML = "";
-        }
+            resultsArray = [];
+
+            var myHeaders = new Headers();
+            myHeaders.append("Content-Type", "application/json");
+
+            var requestOptions = {
+                method: 'DELETE',
+                headers: myHeaders,
+                redirect: 'follow'
+        };
+
+    fetch("https://1361xpvdk0.execute-api.us-east-2.amazonaws.com/dev", requestOptions)
+    .then(response => response.text())
+    .then(result => console.log(result))
+    .catch(error => console.log('error', error));
+}
+
     </script>
 </head>
 <body>
     <form>
-        <label>First Name :</label>
-        <input type="text" id="fName">
-        <label>Last Name :</label>
-        <input type="text" id="lName">
-        <!-- set button onClick method to call function we defined passing input values as parameters -->
-        <button type="button" onclick="callAPI(document.getElementById('fName').value,document.getElementById('lName').value)">Call API</button>
+        <label>Name :</label>
+        <input type="text" id="Name">
+        <label>PPG :</label>
+        <input type="text" id="PPG">
+        <label>APG :</label>
+        <input type="text" id="APG">
+        <label>RPG :</label>
+        <input type="text" id="RPG">
+        <!-- set button onClick method to call function defined passing input values as parameters -->
+        <button type="button" onclick="callAPI(document.getElementById('Name').value,document.getElementById('PPG').value,document.getElementById('APG').value,document.getElementById('RPG').value)">Enter</button>
     </form>
 
     <h1>View Stats</h1>
